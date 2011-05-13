@@ -115,15 +115,17 @@ class Game
             m.vel.Multiply(-160 + 40 * Math.random())
             m.vel_want.SetV(m.vel)
 
-    create_spawner: ->
+    create_spawner: () =>
         new Timer(@world, 0.4, =>
             #if (Math.random() < 0.2)
             #    @create_some_enemies(1 + 2 * Math.random())
-            if (Math.random() < 0.4)
-                @create_some_froth(3 + 3 * Math.random())
+            if (Math.random() < 0.8)
+                @create_some_froth(5 + 5 * Math.random())
+            if (Math.random() < 0.5)
+                @world.drink_speed = Math.random() * 0.1
         )
 
-    create_player: ->
+    create_player: () =>
         player = new DumbUnit(@world)
         s = player.movement.size.Length()
         x = @width / 2 * Math.random()
@@ -147,9 +149,14 @@ class Game
             $(screen).css("visibility", "visible")
             @disable_bindings()
 
+        step = player.step
+        player.step = (dt) =>
+            step(dt)
+            if @world.filling * @world.height < player.sprite.radius.x * 2
+                player.damage.die()
+
         style = [0.8, 0.4, 0.0, 1.0]
         player.sprite.style.stroke = style
-        player.sprite.style.fill = style
 
         player
 
@@ -201,8 +208,7 @@ class Game
         ###
 
     create_world: ->
-        field = [0, 0, @width, @height]
-        world = new World(field)
+        world = new World(@width, @height)
         world
 
     collision_handler: (dt, coll) ->
@@ -214,6 +220,8 @@ class Game
         chandler = @collision_handler
         collisions = @world.get_collisions()
         chandler(dt, collision) for collision in collisions
+        if not @game_over
+            @world.score += dt * 10
         @world.step(dt)
 
     draw: (ctx) ->

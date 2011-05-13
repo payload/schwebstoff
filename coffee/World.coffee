@@ -2,7 +2,7 @@
 # License: GNU AGPL 3, see also COPYING file
 
 class World
-    constructor: (@field) ->
+    constructor: (@width, @height) ->
         @objs = []
         @shapes = []
         @timers = []
@@ -13,7 +13,8 @@ class World
         @laser_sounds = []
         @laser_sound = 0
         @shootdir = new b2Vec2(0, 1)
-        @filling = 0.8
+        @filling = 1.0
+        @drink_speed = 0
 
     switch_mute: ->
         @laser_sounds = if @laser_sounds.length == 0
@@ -21,15 +22,14 @@ class World
         else []
 
     inc_score: ->
-        @score += 1
+        #@score += 1
 
     shell_miss: ->
-        @score -= 1/5
+        #@score -= 1/5
 
     in_field: (vec) ->
-        f = @field
-        vec.x > f[0] && vec.x < field[2] &&
-        vec.y > f[1] && vec.y < field[3]
+        vec.x > f[0] && vec.x < @width &&
+        vec.y > f[1] && vec.y < @height
 
     collision_rect_rect: (a, b) ->
         posa = a.pos
@@ -88,6 +88,7 @@ class World
     remove_timer: (obj) -> @timers.splice(@timers.indexOf(obj),1)
 
     step: (dt) ->
+        @filling -= @drink_speed * dt
         timer.step?(dt) for timer in @timers
         obj.step?(dt) for obj in @objs[0...@objs.length]
 

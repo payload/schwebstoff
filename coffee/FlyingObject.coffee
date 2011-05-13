@@ -19,7 +19,7 @@ class FlyingObject
         then false
         else @damage.collide(dt, obj.damage, coll);
 
-    step: (dt, veladd) ->
+    step: (dt, veladd) =>
         return @remove() if @removed
         @damage.step(dt)
         @movement.step(dt, veladd)
@@ -34,15 +34,15 @@ class FlyingObject
             @removed = true
 
     out_of_sight: ->
-        field = @world.field
-        tl = new b2Vec2(field[0], field[1])
-        br = new b2Vec2(field[2], field[3])
+        t = @world.height - @world.height * @world.filling
+        tl = new b2Vec2(0, t)
+        br = new b2Vec2(@world.width, @world.height)
         m = @movement
         pos = m.pos
         s = m.size.Length()
         svec = new b2Vec2(s, s)
         svec.Multiply(10)
-        tl.Subtract(svec)
+        #tl.Subtract(svec)
         br.Add(svec)
 
         pos.x < tl.x ||
@@ -51,9 +51,9 @@ class FlyingObject
         pos.y > br.y
 
     set_pos_to_field: ->
-        field = @world.field
-        tl = new b2Vec2(field[0], field[1])
-        br = new b2Vec2(field[2], field[3])
+        t = @world.height - @world.height * @world.filling
+        tl = new b2Vec2(0, t)
+        br = new b2Vec2(@world.width, @world.height)
         m = @movement
         pos = m.pos
         vel = m.vel

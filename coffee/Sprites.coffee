@@ -24,7 +24,7 @@ class Circle
         ctx.translate(pos.x, pos.y)
         ctx.rotate(@rot[0])
         ctx.beginPath()
-        ctx.arc(-r / 2, -r / 2, r, 0, 2*Math.PI)
+        ctx.arc(0, 0, r, 0, 2*Math.PI)
         ctx.closePath()
         if @style.fill != null
             ctx.fillStyle = color_to_css(@style.fill)

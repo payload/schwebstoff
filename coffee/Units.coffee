@@ -61,12 +61,14 @@ class DumbUnit extends FlyingObject
             @normsize = null
 
     shoot: (dt) ->
-        if @shooting.shoot(dt, @movement) and @normsize != null
+        shell = @shooting.shoot(dt, @movement)
+        if shell and @normsize != null
+            shell.sprite.style = @sprite.style
             shake = @normsize.Copy()
             shake.Multiply(1 + 0.3 * (Math.random() - Math.random()))
             @movement.size.SetV(shake)
 
-    step: (dt) ->
+    step: (dt) =>
         if @random_movement
             @random_movement_wait -= dt
             if @random_movement_wait <= 0
@@ -75,7 +77,7 @@ class DumbUnit extends FlyingObject
                 @move_down  = !@move_down  if Math.random() < 0.1
                 @move_left  = !@move_left  if Math.random() < 0.1
                 @move_right = !@move_right if Math.random() < 0.1
-        w = @world.field[2]
+        w = @world.width
         pos = @movement.pos
         size = @movement.size.Length()
         if @keep_right_movement
