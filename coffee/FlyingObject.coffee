@@ -12,27 +12,27 @@ class FlyingObject
         @show_energy = false
         @show_energy_0_fill = null
         @world.add_obj(this)
-    
+
     collide: (dt, other, coll) ->
         obj = other.obj
         if @removed or not obj? or obj.removed or not obj.damage?
         then false
         else @damage.collide(dt, obj.damage, coll);
-    
+
     step: (dt, veladd) ->
         return @remove() if @removed
         @damage.step(dt)
         @movement.step(dt, veladd)
         @remove() if @remove_when_out_of_sight and @out_of_sight()
         @set_pos_to_field() if @keep_in_field
-    
+
     remove: ->
         if @removed
             @world.remove_obj(this)
             @sprite.remove()
         else
             @removed = true
-    
+
     out_of_sight: ->
         field = @world.field
         tl = new b2Vec2(field[0], field[1])
@@ -41,7 +41,7 @@ class FlyingObject
         pos = m.pos
         s = m.size.Length()
         svec = new b2Vec2(s, s)
-        br.x *= 2
+        svec.Multiply(10)
         tl.Subtract(svec)
         br.Add(svec)
 
@@ -49,7 +49,7 @@ class FlyingObject
         pos.x > br.x ||
         pos.y < tl.y ||
         pos.y > br.y
-    
+
     set_pos_to_field: ->
         field = @world.field
         tl = new b2Vec2(field[0], field[1])

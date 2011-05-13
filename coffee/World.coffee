@@ -11,23 +11,24 @@ class World
         @score = 0
         @laser_sounds = []
         @laser_sound = 0
-            
+        @shootdir = new b2Vec2(0, 1)
+
     switch_mute: ->
         @laser_sounds = if @laser_sounds.length == 0
         then (new Audio('stuff/laser.ogg') for x in [0...10])
         else []
-            
+
     inc_score: ->
         @score += 1
-        
+
     shell_miss: ->
         @score -= 1/5
-            
+
     in_field: (vec) ->
         f = @field
         vec.x > f[0] && vec.x < field[2] &&
         vec.y > f[1] && vec.y < field[3]
-        
+
     collision_rect_rect: (a, b) ->
         posa = a.pos
         posb = b.pos
@@ -72,3 +73,4 @@ class World
 
     draw_objs: -> obj.draw?() for obj in @objs
     draw_shapes: (ctx) -> shape.draw?(ctx) for shape in @shapes
+

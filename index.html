@@ -5,17 +5,12 @@ License: GNU AGPL 3, see also COPYING file
 -->
 <html>
 <head>
+<link href='http://fonts.googleapis.com/css?family=UnifrakturMaguntia' rel='stylesheet' type='text/css'>
 <style type="text/css">
-@font-face {
-  font-family: 'VT323';
-  font-style: normal;
-  font-weight: normal;
-  src: local('VT323'), url('stuff/VT323.woff') format('woff');
-}
 body {
     width:100%;
     margin:0;
-    font-family:VT323;
+    font-family: 'UnifrakturMaguntia', serif;
 }
 canvas {
     margin:auto;
@@ -39,34 +34,61 @@ h1 {
     max-width:1024px;
     padding:0 1em;
 }
+input {
+    border: none;
+    background: none;
+    font-size: 1em;
+    font-family: 'UnifrakturMaguntia', serif;
+}
+#gameover_screen {
+    position: absolute;
+    margin: 1px;
+    width: 640px;
+    height: 480px;
+    padding-top: 60px;
+    visibility: hidden;
+}
+#gameover {
+    font-size: 5em;
+    display:block;
+}
+#gameover_reload {
+    display:block;
+}
+#gameover_nickname {
+    text-align: inherit;
+}
+#highscore_table {
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+    text-align: left;
+}
+#highscore_table tr {
+}
+#highscore_table td {
+}
 </style>
 </head>
 <body>
 <div id="gamediv">
-    <h1>sidescroller
-    
-    <span style="position:absolute">
-    <a href="http://flattr.com/thing/169883/sidescroller" target="_blank">
-    <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a>
-    </span>
-    
-    </h1>
-    
+    <h1>pivo</h1>
+
     Move with the cursor keys, WASD or HJKL. Shoot via Shift, Space or&nbsp;left&nbsp;mouse&nbsp;button. Pause&nbsp;with&nbsp;P. Mute and unmute the buggy sound with M.
 
-    <canvas id="canvas" width="640" height="480"></canvas>
-</div> 
+    <div>
+        <div id="gameover_screen">
+            <span id="gameover"">Game Over</span>
+            <span id="gameover_reload">Reload with F5 or Ctrl+R to play it again!"</span>
+        </div>
+        <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+</div>
 <div id="footerdiv">
-    Watch also my
-        <a href="https://github.com/payload/sidescroller/">github&nbsp;account</a>
-    there you can also use the
-        <a href="https://github.com/payload/sidescroller/issues">issue&nbsp;tracker</a>
-    to spam me with your ruthless wishes.
-    Or blame me on my
-        <a href="http://payload-bay.de">identi.ca&nbsp;account</a>.
+    Vote me for president! </br>
     BTW:&nbsp;Cheat&nbsp;the&nbsp;time&nbsp;with&nbsp;Minus,&nbsp;Plus&nbsp;and&nbsp;0.
 </div>
-<script type="text/javascript" src="build/sidescroller.js"></script>
+<script type="text/javascript" src="build/pivo.js"></script>
 </body>
 </html>
 

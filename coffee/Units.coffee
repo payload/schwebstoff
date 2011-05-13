@@ -1,23 +1,35 @@
 # Copyright © 2011 Gilbert "payload" Röhrbein
 # License: GNU AGPL 3, see also COPYING file
 
+class Bubble extends FlyingObject
+    constructor: (@world) ->
+        super(world)
+        m = @movement
+        m.size.Set(10, 10)
+        dmg = @damage
+        dmg.energy = 3
+        dmg.to_apply = 20
+        dmg.factor = 1
+        dmg.die = => @remove()
+        dmg.groups.push("obstacle")
+
 class DumbUnit extends FlyingObject
     constructor: (@world) ->
         super(world)
         @movement.size.Set(20, 20)
-        
+
         @move_up = false
         @move_down = false
         @move_left = false
         @move_right = false
-        
+
         @normsize = null
         @shooting = new ShootingModel(world)
         @random_movement = 0
         @random_movement_wait = 0
         @keep_right_movement = false
         @keep_right_impulse = false
-        
+
         dmg = @damage
         dmg.energy = 10
         dmg.max_energy = 10
@@ -25,12 +37,12 @@ class DumbUnit extends FlyingObject
         dmg.factor = 1
         dmg.die = => @remove()
         @shock_energy = dmg.energy
-    
+
     collide: (dt, other, coll) ->
         if super(dt, other, coll) and @shock_energy - @damage.energy > 0.5
             @shock_energy = @damage.energy
             @movement.rot[0] = Math.random() * 2 * Math.PI
-    
+
     move_up_on: (dt) -> @move_up = true
     move_up_off: (dt) -> @move_up = false
     move_down_on: (dt) -> @move_down = true
@@ -39,21 +51,21 @@ class DumbUnit extends FlyingObject
     move_left_off: (dt) -> @move_left = false
     move_right_on: (dt) -> @move_right = true
     move_right_off: (dt) -> @move_right = false
-    
+
     shoot_on: ->
         @normsize = @movement.size.Copy() if @normsize is null
-    
+
     shoot_off: ->
         if @normsize
             @movement.size.SetV(@normsize)
             @normsize = null
-    
+
     shoot: (dt) ->
         if @shooting.shoot(dt, @movement) and @normsize != null
             shake = @normsize.Copy()
             shake.Multiply(1 + 0.3 * (Math.random() - Math.random()))
             @movement.size.SetV(shake)
-    
+
     step: (dt) ->
         if @random_movement
             @random_movement_wait -= dt
@@ -77,7 +89,7 @@ class DumbUnit extends FlyingObject
             @move_up = false
             @move_down = false
             @move_right = true
-    
+
         polar = b2Vec2.Polar
         pi = 3.14159
         velmax = @movement.vel_max[0]
@@ -86,6 +98,7 @@ class DumbUnit extends FlyingObject
         veladd.AddPolar(pi * 0.0, velmax) if @move_right
         veladd.AddPolar(pi * 0.5, velmax) if @move_down
         veladd.AddPolar(pi * 1.0, velmax) if @move_left
-        
+
         super(dt, veladd)
         @shooting.step(dt, @movement)
+

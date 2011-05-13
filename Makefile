@@ -1,4 +1,4 @@
-PROJECT = sidescroller
+PROJECT = pivo
 BUILD_PATH = build
 COFFEE = $(wildcard coffee/*.coffee)
 JS = $(wildcard js/*.js)

@@ -2,7 +2,8 @@
 # License: GNU AGPL 3, see also COPYING file
 
 class Game
-    constructor: (@canvas, @bindings) ->
+    constructor: (@dom, @bindings) ->
+        @canvas = @dom.canvas
         @width = @canvas.width
         @height = @canvas.height
         @world = @create_world()
@@ -16,6 +17,8 @@ class Game
         @texts = @create_texts()
         @actions = @create_actions()
         @set_bindings()
+        @myscore = 0
+        @mynick = "Anony Mous"
 
     create_keys: ->
         up: [87, 75, 38]
@@ -52,7 +55,7 @@ class Game
             (dt) => @player.move_down_off(dt),
             null]
         right: [
-            (dt) => @player.move_right_on(dt), 
+            (dt) => @player.move_right_on(dt),
             (dt) => @player.move_right_off(dt),
             null]
         shoot: [
@@ -80,10 +83,13 @@ class Game
     set_bindings: ->
         @enable_binding(@keys[x], @actions[x]) for own x of @actions
 
-    disable_player_bindings: ->
+    disable_player_bindings: () =>
+        @disable_bindings( (x) => x not in ['pause', 'mute'] )
+
+    disable_bindings: (filter) =>
         for own y of @actions
-            if y not in ['pause', 'mute'] 
-                @bindings.disable(x) for x in @keys[y] 
+            if not filter or filter(y)
+                @bindings.disable(x) for x in @keys[y]
 
     enable_binding: (keys, action) ->
         @bindings.enable.apply(@bindings, [k].concat(action)) for k in keys
@@ -94,47 +100,29 @@ class Game
         then @disable_player_bindings()
         else @set_bindings()
 
-    create_some_obstacles: (count) ->
+    spawn_position: (s) =>
+        x = @width * Math.random()
+        y = @height + s
+        x = Math.max(Math.min(x, @width - s / 2), s / 2)
+        return new b2Vec2(x, y)
+
+    create_some_froth: (count) =>
         for i in [0...count]
-            obj = new Obstacle(@world)
-            s = obj.movement.size.Length()
-            x = @width + s
-            y = @height * Math.random()
-            y = Math.max(Math.min(y, @height - s / 2), s / 2)
-            obj.movement.pos.Set(x, y)
-            obj.damage.groups.push("obstacle")
-    
+            obj = new Bubble(@world)
+            m = obj.movement
+            m.pos.SetV(@spawn_position(m.size.Length()))
+            m.vel.SetV(@world.shootdir)
+            m.vel.Multiply(-160 + 40 * Math.random())
+            m.vel_want.SetV(m.vel)
+
     create_spawner: ->
         new Timer(@world, 0.4, =>
-            if (Math.random() < 0.2)
-                @create_some_enemies(1 + 2 * Math.random())
+            #if (Math.random() < 0.2)
+            #    @create_some_enemies(1 + 2 * Math.random())
             if (Math.random() < 0.3)
-                @create_some_obstacles(1 + 3 * Math.random())
+                @create_some_froth(1 + 3 * Math.random())
         )
-    
-    create_some_enemies: (count) ->
-        for i in [0...count]
-            obj = new DumbUnit(@world)
-            m = obj.movement
-            s = m.size.Length()
-            x = @width + s
-            y = @height * Math.random()
-            y = Math.max(Math.min(y, @height - s / 2), s / 2)
-            obj.damage.groups.push("enemy")
-            obj.damage.energy = 6
-            # I don't set obj.damage.max_energy here, cause I want to use the
-            # different drawing of an enemy, caused by this missing of energy
-            obj.shooting.shell_group = "enemy"
-            m.pos.Set(x + m.size.x, y)
-            m.vel.Set(-100 + 40 * Math.random(), 0)
-            m.vel_want.SetV(m.vel)
-            obj.random_movement = 0.01 if Math.random() < 0.5
-            if obj.random_movement and Math.random() < 0.5
-                obj.keep_right_movement = true 
-                obj.damage.groups.push("obstacle")
-                obj.show_energy = true
-                obj.damage.regenerate = -0.4
-    
+
     create_player: ->
         player = new DumbUnit(@world)
         s = player.movement.size.Length()
@@ -146,7 +134,7 @@ class Game
         player.keep_in_field = true
         player.shooting.auto_shoot = false
         player.shooting.recharge_time = 0.05
-        player.shooting.shell_vel.Set(1200, 0)
+        player.shooting.shell_vel = 1200
         player.damage.groups.push("player")
         player.shooting.shell_group = "player"
         player.movement.pos.Set(x, y)
@@ -155,31 +143,82 @@ class Game
         player.damage.die = (other) =>
             die(other)
             @game_over = true
+            screen = @dom.gameover
+            $(screen).css("visibility", "visible")
+            @show_highscore()
+            @disable_bindings()
         player
+
+    fetch_highscore: (score) =>
+        # TODO fetch highscore from server
+        ###[{
+            rank: 0
+            nick: undefined
+            score: score
+            },{
+            rank: 1
+            nick: "foo"
+            score: "some"
+        }]
+        ###
+
+    push_highscore_entry: (nick, score) =>
+        # TODO push highscore entry to server
+        #alert(nick, score)
+
+    close: () =>
+        if @game_over
+            @push_highscore_entry(@mynick, @myscore)
+
+    show_highscore: () =>
+        ###
+        @myscore = Math.round(@world.score)
+        highscore = @fetch_highscore(@myscore)
+        { hstable, hsline } = @dom
+        $(hstable).empty()
+        for { rank, nick, score } in highscore
+            line = hsline.clone(true)
+            tds = line.children()
+            hsrank = tds.filter(".highscore_rank")
+            hsnick = tds.filter(".highscore_nick")
+            hsscore = tds.filter(".highscore_score")
+            hsrank.append("#{rank}.")
+            hsnick_input = hsnick.children().filter("input")
+            if nick is undefined
+                hsnick_input.prop { value: "Anony Mous"}
+                mynick = hsnick_input
+            else
+                hsnick_input.prop { value: nick } # TODO readonly
+            hsscore.append("#{score}")
+            $(hstable).append(line)
+            mynick.focus()
+            mynick.change () =>
+                @mynick = mynick.html()
+        ###
 
     create_world: ->
         field = [0, 0, @width, @height]
         world = new World(field)
         world
-    
+
     collision_handler: (dt, coll) ->
         coll.a.obj?.collide?(dt, coll.b, coll)
         coll.b.obj?.collide?(dt, coll.a, coll)
-    
+
     step: (dt) ->
         return undefined if @pause
         chandler = @collision_handler
         collisions = @world.get_collisions()
         chandler(dt, collision) for collision in collisions
         @world.step(dt)
-    
+
     draw: (ctx) ->
         create_style: ->
         normal_font = (ctx) ->
-            ctx.font = "1em VT323"
+            ctx.font = "1em UnifrakturMaguntia"
         big_font = (ctx) ->
-            ctx.font = "5em VT323"
-        
+            ctx.font = "5em UnifrakturMaguntia"
+
         ctx.save()
         ctx.lineWidth = 2
         ctx.strokeStyle = "gray"
@@ -199,25 +238,5 @@ class Game
             normal_font(ctx)
             ctx.fillText(tf, 6, 40)
             ctx.restore()
-        # game over screen
-        if @game_over
-            ctx.save()
-            cw = @width/2
-            ch = @height/2
-            ctx.translate(cw, ch)
-            ctx.textAlign = "center"
-            
-            ctx.save()
-            normal_font(ctx)
-            ctx.fillText(@texts.reload, 0, 22)
-            ctx.restore()
-            
-            ctx.save()
-            big_font(ctx)
-            ctx.fillText(@texts.game_over, 0, 0)
-            ctx.restore()
-            
-            ctx.restore()
         ctx.restore()
-
 
