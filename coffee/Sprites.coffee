@@ -1,6 +1,39 @@
 # Copyright © 2011 Gilbert "payload" Röhrbein
 # License: GNU AGPL 3, see also COPYING file
 
+class Circle
+    constructor: (@world, @obj) ->
+        m = @obj.movement
+        @pos = m.pos
+        @radius = m.size
+        @rot = m.rot or [0]
+        @type = "circle"
+        @obj or= null
+        @style =
+            stroke: [1.0, 0.9, 0.5, 1.0]
+            fill: [1.0, 0.9, 0.5, 1.0]
+        @world.add_shape(this)
+
+    remove: ->
+        @world.remove_shape(this)
+
+    draw: (ctx) ->
+        ctx.save()
+        pos = @pos
+        r = @radius.x / 2
+        ctx.translate(pos.x, pos.y)
+        ctx.rotate(@rot[0])
+        ctx.beginPath()
+        ctx.arc(-r / 2, -r / 2, r, 0, 2*Math.PI)
+        ctx.closePath()
+        if @style.fill != null
+            ctx.fillStyle = color_to_css(@style.fill)
+            ctx.fill()
+        if @style.stroke != null
+            ctx.strokeStyle = color_to_css(@style.stroke)
+            ctx.stroke()
+        ctx.restore()
+
 class Rectangle
     constructor: (@world, @obj) ->
         m = @obj.movement
@@ -16,7 +49,7 @@ class Rectangle
 
     remove: ->
         @world.remove_shape(this)
-    
+
     draw: (ctx) ->
         ctx.save()
         pos = @pos
@@ -29,17 +62,10 @@ class Rectangle
         ctx.rect(-w / 2, -h / 2, w, h)
         ctx.closePath()
         if @style.fill != null
-            ctx.fillStyle = @color_to_css(@style.fill)
+            ctx.fillStyle = color_to_css(@style.fill)
             ctx.fill()
         if @style.stroke != null
-            ctx.strokeStyle = @color_to_css(@style.stroke)
+            ctx.strokeStyle = color_to_css(@style.stroke)
             ctx.stroke()
         ctx.restore()
-    
-    color_to_css: (color) ->
-        r = Math.round(color[0] * 255)
-        g = Math.round(color[1] * 255)
-        b = Math.round(color[2] * 255)
-        a = color[3]
-        "rgba(#{r},#{g},#{b},#{a})"
 

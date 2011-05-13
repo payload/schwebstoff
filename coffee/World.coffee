@@ -8,10 +8,12 @@ class World
         @timers = []
         @collide =
             rect_rect: @collision_rect_rect
+            circle_circle: @collision_circle_circle
         @score = 0
         @laser_sounds = []
         @laser_sound = 0
         @shootdir = new b2Vec2(0, 1)
+        @filling = 0.8
 
     switch_mute: ->
         @laser_sounds = if @laser_sounds.length == 0
@@ -36,6 +38,24 @@ class World
         diff.Subtract(posa)
         distance = diff.Length()
         min_distance = a.size.Length()*0.5 + b.size.Length()*0.5
+        if distance < min_distance
+            a: a,
+            b: b,
+            diff: diff,
+            distance: distance,
+            min_distance: min_distance
+        else
+            null
+
+    collision_circle_circle: (a, b) ->
+        posa = a.pos
+        posb = b.pos
+        diff = posb.Copy()
+        diff.Subtract(posa)
+        distance = diff.Length()
+        ar = a.radius.x / 2
+        br = b.radius.x / 2
+        min_distance = ar + br
         if distance < min_distance
             a: a,
             b: b,

@@ -119,8 +119,8 @@ class Game
         new Timer(@world, 0.4, =>
             #if (Math.random() < 0.2)
             #    @create_some_enemies(1 + 2 * Math.random())
-            if (Math.random() < 0.3)
-                @create_some_froth(1 + 3 * Math.random())
+            if (Math.random() < 0.4)
+                @create_some_froth(3 + 3 * Math.random())
         )
 
     create_player: ->
@@ -145,8 +145,12 @@ class Game
             @game_over = true
             screen = @dom.gameover
             $(screen).css("visibility", "visible")
-            @show_highscore()
             @disable_bindings()
+
+        style = [0.8, 0.4, 0.0, 1.0]
+        player.sprite.style.stroke = style
+        player.sprite.style.fill = style
+
         player
 
     fetch_highscore: (score) =>
@@ -220,8 +224,19 @@ class Game
             ctx.font = "5em UnifrakturMaguntia"
 
         ctx.save()
+
+        ctx.save()
+        filling = @world.filling
+        w = @width
+        h = @height
+        ctx.beginPath()
+        ctx.rect(0, h - h * filling, w, h * filling)
+        ctx.closePath()
+        ctx.fillStyle = "#FFBE00"
+        ctx.fill()
+        ctx.restore()
+
         ctx.lineWidth = 2
-        ctx.strokeStyle = "gray"
         @world.draw_objs()
         @world.draw_shapes(ctx)
         # score

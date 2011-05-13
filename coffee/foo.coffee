@@ -1,6 +1,13 @@
 # Copyright © 2011 Gilbert "payload" Röhrbein
 # License: GNU AGPL 3, see also COPYING file
 
+color_to_css = (color) ->
+    r = Math.round(color[0] * 255)
+    g = Math.round(color[1] * 255)
+    b = Math.round(color[2] * 255)
+    a = color[3]
+    "rgba(#{r},#{g},#{b},#{a})"
+
 $(document).ready ->
     dom = {}
 

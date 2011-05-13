@@ -5,7 +5,7 @@ class FlyingObject
     constructor: (@world) ->
         @movement = new MovementModel()
         @damage = new DamageModel()
-        @sprite = new Rectangle(world, this)
+        @sprite = new Circle(world, this)
         @keep_in_field = false
         @remove_when_out_of_sight = true
         @removed = false
